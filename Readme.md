@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Марина Целищева](https://up.htmlacademy.ru/javascript/17/user/587145).
-* Наставник: `Неизвестно`.
+* Наставник: `Кексобот`.
 
 ---
 
