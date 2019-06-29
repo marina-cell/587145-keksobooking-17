@@ -1,6 +1,7 @@
 'use strict';
 
-var TYPES = ['palace', 'flat', 'house', 'bungalo'];
+var TYPES = ['bungalo', 'flat', 'house', 'palace'];
+var MIN_PRICES = [0, 1000, 5000, 10000];
 var Y_MIN = 130;
 var Y_MAX = 630;
 var OFFERS_NUMBER = 8;
@@ -12,6 +13,10 @@ var adForm = document.querySelector('.ad-form');
 var adFormElements = adForm.querySelectorAll('fieldset');
 var filtersFormElements = mapFiltersBlock.children;
 var addressInput = adForm.querySelector('#address');
+var checkInTime = adForm.querySelector('#timein');
+var checkOutTime = adForm.querySelector('#timeout');
+var housingType = adForm.querySelector('#type');
+var housingPrice = adForm.querySelector('#price');
 
 var getRandomValue = function (min, max) {
   return Math.floor(Math.random() * (max - min) + min);
@@ -113,7 +118,6 @@ var setAddress = function (x, y) {
 
 var setInitialMode = function () {
   setInactiveMode();
-  addressInput.readOnly = true; // Строка адреса всегда недоступна для заполнения
   var dimensions = mainPin.getBoundingClientRect();
   setAddress(Math.round(dimensions.left + dimensions.width / 2), Math.round(dimensions.top + dimensions.height / 2));
 };
@@ -122,6 +126,22 @@ mainPin.addEventListener('click', setActiveMode);
 
 mainPin.addEventListener('mouseup', function (evt) {
   setAddress(evt.clientX, evt.clientY); // не использовать координаты client, т.к. они относительно окна (без учета прокрутки)
+});
+
+checkInTime.addEventListener('change', function (evt) {
+  checkOutTime.value = evt.target.value;
+});
+
+checkOutTime.addEventListener('change', function (evt) {
+  checkInTime.value = evt.target.value;
+});
+
+housingType.addEventListener('change', function (evt) {
+  var typeIndex = TYPES.indexOf(evt.target.value);
+  if (typeIndex !== -1) {
+    housingPrice.min = MIN_PRICES[typeIndex];
+    housingPrice.placeholder = MIN_PRICES[typeIndex];
+  }
 });
 
 setInitialMode();
