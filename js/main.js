@@ -2,12 +2,14 @@
 
 var TYPES = ['bungalo', 'flat', 'house', 'palace'];
 var MIN_PRICES = [0, 1000, 5000, 10000];
+var X_MIN = 0;
 var Y_MIN = 130;
 var Y_MAX = 630;
 var OFFERS_NUMBER = 8;
 
 var mapBlock = document.querySelector('.map');
 var mainPin = mapBlock.querySelector('.map__pin--main');
+var isActiveMode = false;
 var mapFiltersBlock = mapBlock.querySelector('.map__filters');
 var adForm = document.querySelector('.ad-form');
 var adFormElements = adForm.querySelectorAll('fieldset');
@@ -50,7 +52,7 @@ var createOffersArray = function () {
           'type': getRandomValueFromArray(TYPES)
         },
         'location': {
-          'x': getRandomValue(0, document.documentElement.clientWidth),
+          'x': getRandomValue(X_MIN, mapBlock.clientWidth),
           'y': getRandomValue(Y_MIN, Y_MAX)
         }
       };
@@ -68,7 +70,9 @@ var renderOffer = function (offer) {
   var pinImage = pinElement.querySelector('img');
 
   // Находим координаты пина, учитывая размер изображения
-  pinElement.style = 'left: ' + Number(offer.location.x + pinImage.width / 2) + 'px; top: ' + Number(offer.location.y + pinImage.height) + 'px;';
+  var xCoordinate = Number(offer.location.x + pinImage.clientWidth / 2);
+  var yCoodinate = Number(offer.location.y + pinImage.clientHeight);
+  pinElement.style = 'left: ' + xCoordinate + 'px; top: ' + yCoodinate + 'px;';
   pinImage.src = offer.author.avatar;
   pinImage.alt = 'Заголовок объявления';
   return pinElement;
@@ -85,30 +89,37 @@ var renderOffersOnMap = function (offers) {
 };
 
 var setActiveMode = function () {
-  mapBlock.classList.remove('map--faded');
-  adForm.classList.remove('ad-form--disabled');
+  if (!isActiveMode) {
+    mapBlock.classList.remove('map--faded');
+    adForm.classList.remove('ad-form--disabled');
 
-  for (var i = 0; i < adFormElements.length; i++) {
-    adFormElements[i].disabled = false;
+    for (var i = 0; i < adFormElements.length; i++) {
+      adFormElements[i].disabled = false;
+    }
+
+    for (i = 0; i < filtersFormElements.length; i++) {
+      filtersFormElements[i].disabled = false;
+    }
+
+    renderOffersOnMap(createOffersArray());
+    isActiveMode = true;
   }
-
-  for (i = 0; i < filtersFormElements.length; i++) {
-    filtersFormElements[i].disabled = false;
-  }
-
-  renderOffersOnMap(createOffersArray());
 };
 
 var setInactiveMode = function () {
-  mapBlock.classList.add('map--faded');
-  adForm.classList.add('ad-form--disabled');
+  if (isActiveMode) {
+    mapBlock.classList.add('map--faded');
+    adForm.classList.add('ad-form--disabled');
 
-  for (var i = 0; i < adFormElements.length; i++) {
-    adFormElements[i].disabled = true;
-  }
+    for (var i = 0; i < adFormElements.length; i++) {
+      adFormElements[i].disabled = true;
+    }
 
-  for (i = 0; i < filtersFormElements.length; i++) {
-    filtersFormElements[i].disabled = true;
+    for (i = 0; i < filtersFormElements.length; i++) {
+      filtersFormElements[i].disabled = true;
+    }
+
+    isActiveMode = false;
   }
 };
 
@@ -119,13 +130,69 @@ var setAddress = function (x, y) {
 var setInitialMode = function () {
   setInactiveMode();
   var dimensions = mainPin.getBoundingClientRect();
-  setAddress(Math.round(dimensions.left + dimensions.width / 2), Math.round(dimensions.top + dimensions.height / 2));
+  setAddress(Math.round(dimensions.left + dimensions.width / 2 + pageXOffset), Math.round(dimensions.top + dimensions.height / 2 + pageYOffset));
 };
 
-mainPin.addEventListener('click', setActiveMode);
+// Перемещение окна диалога
+mainPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
 
-mainPin.addEventListener('mouseup', function (evt) {
-  setAddress(evt.clientX, evt.clientY); // не использовать координаты client, т.к. они относительно окна (без учета прокрутки)
+  var startCoords = {
+    x: evt.pageX,
+    y: evt.pageY
+  };
+
+  var isDragged = false;
+
+  var onMouseMove = function (moveEvt) {
+    moveEvt.preventDefault();
+    isDragged = true;
+
+    var shift = {
+      x: startCoords.x - moveEvt.pageX,
+      y: startCoords.y - moveEvt.pageY
+    };
+
+    startCoords = {
+      x: moveEvt.pageX,
+      y: moveEvt.pageY
+    };
+
+    var xMovement = mainPin.offsetLeft - shift.x;
+    var yMovement = mainPin.offsetTop - shift.y;
+
+    var xMax = mapBlock.clientWidth - mainPin.clientWidth;
+
+    xMovement = (xMovement < X_MIN) ? X_MIN : xMovement;
+    xMovement = (xMovement > xMax) ? xMax : xMovement;
+
+    yMovement = (yMovement < Y_MIN) ? Y_MIN : yMovement;
+    yMovement = (yMovement > Y_MAX) ? Y_MAX : yMovement;
+
+    mainPin.style.left = xMovement + 'px';
+    mainPin.style.top = yMovement + 'px';
+
+    setAddress(Math.round(xMovement), Math.round(yMovement));
+  };
+
+  var onMouseUp = function (upEvt) {
+    upEvt.preventDefault();
+
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    if (isDragged) {
+      var onClickPreventDefault = function (clickEvt) {
+        clickEvt.preventDefault();
+        mainPin.removeEventListener('click', onClickPreventDefault);
+      };
+      mainPin.addEventListener('click', onClickPreventDefault);
+    }
+  };
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+  mainPin.addEventListener('click', setActiveMode);
 });
 
 checkInTime.addEventListener('change', function (evt) {
