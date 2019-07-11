@@ -129,8 +129,7 @@ var setAddress = function (x, y) {
 
 var setInitialMode = function () {
   setInactiveMode();
-  var dimensions = mainPin.getBoundingClientRect();
-  setAddress(Math.round(dimensions.left + dimensions.width / 2 + pageXOffset), Math.round(dimensions.top + dimensions.height / 2 + pageYOffset));
+  setAddress(Math.round(mainPin.offsetLeft + mainPin.clientWidth / 2), Math.round(mainPin.offsetTop + mainPin.clientHeight / 2));
 };
 
 // Перемещение окна диалога
@@ -142,11 +141,8 @@ mainPin.addEventListener('mousedown', function (evt) {
     y: evt.pageY
   };
 
-  var isDragged = false;
-
   var onMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
-    isDragged = true;
 
     var shift = {
       x: startCoords.x - moveEvt.pageX,
@@ -172,7 +168,7 @@ mainPin.addEventListener('mousedown', function (evt) {
     mainPin.style.left = xMovement + 'px';
     mainPin.style.top = yMovement + 'px';
 
-    setAddress(Math.round(xMovement), Math.round(yMovement));
+    setAddress(Math.round(xMovement + mainPin.clientWidth / 2), Math.round(yMovement + mainPin.clientHeight));
   };
 
   var onMouseUp = function (upEvt) {
@@ -181,18 +177,12 @@ mainPin.addEventListener('mousedown', function (evt) {
     document.removeEventListener('mousemove', onMouseMove);
     document.removeEventListener('mouseup', onMouseUp);
 
-    if (isDragged) {
-      var onClickPreventDefault = function (clickEvt) {
-        clickEvt.preventDefault();
-        mainPin.removeEventListener('click', onClickPreventDefault);
-      };
-      mainPin.addEventListener('click', onClickPreventDefault);
-    }
+    setAddress(Math.round(mainPin.offsetLeft + mainPin.clientWidth / 2), Math.round(mainPin.offsetTop + mainPin.clientHeight));
+    setActiveMode();
   };
 
   document.addEventListener('mousemove', onMouseMove);
   document.addEventListener('mouseup', onMouseUp);
-  mainPin.addEventListener('click', setActiveMode);
 });
 
 checkInTime.addEventListener('change', function (evt) {
