@@ -2,13 +2,7 @@
 
 (function () {
   var mapBlock = document.querySelector('.map');
-  // var mapFiltersBlock = mapBlock.querySelector('.map__filters');
   var mainPin = mapBlock.querySelector('.map__pin--main');
-  // var adForm = document.querySelector('.ad-form');
-  // var adFormElements = adForm.querySelectorAll('fieldset');
-  // var filtersFormElements = mapFiltersBlock.children;
-  // var addressInput = adForm.querySelector('#address');
-  // var isActiveMode = false;
 
   // Перемещение метки
   mainPin.addEventListener('mousedown', function (evt) {
