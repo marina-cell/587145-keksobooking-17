@@ -10,10 +10,6 @@
   var addressInput = adForm.querySelector('#address');
   var isActiveMode = false;
 
-  var successHandler = function (offers) {
-    window.renderOffers(offers);
-  };
-
   window.map = {
     sizes: {
       X_MIN: 0,
@@ -36,7 +32,7 @@
           filtersFormElements[i].disabled = false;
         }
 
-        window.backend.load(successHandler, window.backend.errorHandler);
+        window.renderOffers();
         isActiveMode = true;
       }
     },
