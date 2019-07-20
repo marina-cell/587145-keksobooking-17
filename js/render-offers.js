@@ -18,13 +18,22 @@
     return pinElement;
   };
 
-  window.renderOffers = function (offers) {
+  window.renderOffers = function () {
     var mapElement = document.querySelector('.map__pins');
+    var pins = mapElement.querySelectorAll('.map__pin');
+
+    Array.from(pins).forEach(function (pin) {
+      if (!pin.classList.contains('map__pin--main')) {
+        pin.remove();
+      }
+    });
+
     var pinsFragment = document.createDocumentFragment();
 
-    for (var i = 0; i < offers.length; i++) {
-      pinsFragment.appendChild(renderOffer(offers[i]));
-    }
+    window.offers.filtered.forEach(function (pin) {
+      pinsFragment.appendChild(renderOffer(pin));
+    });
+
     mapElement.appendChild(pinsFragment);
   };
 })();
