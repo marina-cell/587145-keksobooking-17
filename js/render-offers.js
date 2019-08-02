@@ -15,6 +15,17 @@
     pinElement.style = 'left: ' + xCoordinate + 'px; top: ' + yCoodinate + 'px;';
     pinImage.src = offer.author.avatar;
     pinImage.alt = 'Заголовок объявления';
+
+    var onPinClick = function () {
+      var mapCardRemovable = mapBlock.querySelector('.map__card');
+      if (mapCardRemovable) {
+        mapCardRemovable.remove();
+      }
+      renderPopup(offer);
+    };
+
+    pinElement.addEventListener('click', onPinClick);
+
     return pinElement;
   };
 
@@ -45,7 +56,9 @@
     return photosFragment;
   };
 
-  var renderPopups = function (offer) {
+  var renderPopup = function (offer) {
+    var mapBlock = document.querySelector('.map');
+    var mapFilters = mapBlock.querySelector('.map__filters-container');
     var popupTemplate = document.querySelector('#card').content.querySelector('.popup');
     var popupElement = popupTemplate.cloneNode(true);
     var typesMap = {
@@ -66,14 +79,29 @@
     popupElement.querySelector('.popup__features').appendChild(createFeatureFragment(popupElement, offer));
     popupElement.querySelector('.popup__photos').appendChild(createPhotoFragment(popupElement, offer));
 
-    return popupElement;
+    var popupsFragment = document.createDocumentFragment();
+    popupsFragment.appendChild(popupElement);
+    mapBlock.insertBefore(popupsFragment, mapFilters);
+
+    var closeBtn = popupElement.querySelector('.popup__close');
+
+    var onEscPress = function (evt) {
+      window.utils.doSmthIfEscEvent(evt, closePopup);
+    };
+
+    var closePopup = function () {
+      popupElement.remove();
+      document.removeEventListener('keydown', onEscPress);
+    };
+
+    closeBtn.addEventListener('click', closePopup);
+    document.addEventListener('keydown', onEscPress);
   };
 
   window.renderOffers = function () {
     var mapElement = document.querySelector('.map');
     var mapPinsElement = mapElement.querySelector('.map__pins');
     var pins = mapPinsElement.querySelectorAll('.map__pin');
-    var mapFilters = mapElement.querySelector('.map__filters-container');
 
     Array.from(pins).forEach(function (pin) {
       if (!pin.classList.contains('map__pin--main')) {
@@ -82,14 +110,11 @@
     });
 
     var pinsFragment = document.createDocumentFragment();
-    var popupsFragment = document.createDocumentFragment();
 
     window.offers.filtered.forEach(function (it) {
       pinsFragment.appendChild(renderPins(it));
-      popupsFragment.appendChild(renderPopups(it));
     });
 
     mapPinsElement.appendChild(pinsFragment);
-    mapElement.insertBefore(popupsFragment, mapFilters);
   };
 })();

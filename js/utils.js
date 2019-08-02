@@ -6,7 +6,7 @@ window.utils = (function () {
 
   return {
     doSmthIfEscEvent: function (evt, action) {
-      if (evt.keyCode === ESC_KEYCODE && evt.target.type !== 'text') {
+      if (evt.keyCode === ESC_KEYCODE) {
         action();
       }
     },
