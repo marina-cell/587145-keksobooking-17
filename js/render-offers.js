@@ -101,20 +101,23 @@
   window.renderOffers = function () {
     var mapElement = document.querySelector('.map');
     var mapPinsElement = mapElement.querySelector('.map__pins');
-    var pins = mapPinsElement.querySelectorAll('.map__pin');
+    var pinsFragment = document.createDocumentFragment();
+
+    window.removeOffers();
+    window.offers.filtered.forEach(function (it) {
+      pinsFragment.appendChild(renderPins(it));
+    });
+
+    mapPinsElement.appendChild(pinsFragment);
+  };
+
+  window.removeOffers = function () {
+    var pins = document.querySelectorAll('.map__pin');
 
     Array.from(pins).forEach(function (pin) {
       if (!pin.classList.contains('map__pin--main')) {
         pin.remove();
       }
     });
-
-    var pinsFragment = document.createDocumentFragment();
-
-    window.offers.filtered.forEach(function (it) {
-      pinsFragment.appendChild(renderPins(it));
-    });
-
-    mapPinsElement.appendChild(pinsFragment);
   };
 })();

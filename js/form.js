@@ -51,4 +51,18 @@
   capacitySelect.addEventListener('change', function (evt) {
     evt.target.setCustomValidity('');
   });
+
+  var successHandler = function () {
+    window.map.setInactiveMode();
+    // document.removeEventListener('keydown', onUploadWindowEscPress);
+  };
+
+  var errorHandler = function () {
+
+  };
+
+  adForm.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(adForm), successHandler, errorHandler);
+  });
 }());
