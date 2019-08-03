@@ -40,7 +40,20 @@
       mapBlock.classList.add('map--faded');
       adForm.classList.add('ad-form--disabled');
 
+      window.removeOffers();
+      var cardPopup = document.querySelector('.popup');
+      if (cardPopup) {
+        cardPopup.remove();
+      }
+
       for (var i = 0; i < adFormElements.length; i++) {
+        var formInput = adFormElements[i].querySelector('input');
+        var formTextArea = adFormElements[i].querySelector('textarea');
+        if (formInput) {
+          formInput.value = '';
+        } else if (formTextArea) {
+          formTextArea.value = '';
+        }
         adFormElements[i].disabled = true;
       }
 
